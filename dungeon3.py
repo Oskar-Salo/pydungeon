@@ -13,10 +13,14 @@ legend = {
         "d":"a huge dragon",
         "@":"the player",
         "k":"a key to open a door",
-        ">":"stair down",
-        "<":"stair up",
+        ">":"a stair down",
+        "<":"a stair up",
         "A":"a good locking amulett",
-        "G":"a stone golem"
+        "G":"a stone golem",
+        "s":"a sharp sword",
+        "/":"a pointy spear",
+        "0":"a hard shield",
+        "q":"a heavy mace"
             }
         
 def create_textlevel(maxx=80, maxy=24):
@@ -128,6 +132,74 @@ def opendoor(player, door):
     message += "You must find a key (k) to open the door "
         
 
+
+class Item():
+
+    number = 0
+    store = {}
+   
+    def __init__(self, x=1, y=1, z=1):
+       self.number = Item.number
+       Item.number += 1
+       Item.store[self.number] = self
+       # bonus
+       self.damage_bonus = 0
+       self.attack_bonus = 0
+       self.defense_bonus = 0
+       self.char = "x"
+       self.protection = 0
+       self.quality = random.random()
+       self.bonus = int(random.gauss(0,1))
+       self.overwrite_parameters()
+       
+    def overwrite_parameters():
+        pass
+
+    def __str__(self):
+        msg = "\n--------------------{}--------------------------------".format(self.__class__.__name__)
+        msg += "\nmein BONUS ist " + str(self.bonus)
+        msg += "\ndamage = {} {} {} = {}".format(self.damage_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.damage_bonus+self.bonus)
+        msg += "\ndefense = {} {} {} = {}".format(self.defense_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.defense_bonus+self.bonus)
+        msg += "\nattack = {} {} {} = {}".format(self.attack_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.attack_bonus+self.bonus)
+        return msg
+        
+
+class Sword(Item):
+    
+    def overwrite_parameters(self):
+        self.char = "s"
+        self.attack_bonus = 1
+        self.defense_bonus = 2
+        self.damage_bonus = 5
+       
+       
+class Spear(Item):
+    
+    def overwrite_parameters(self):
+        self.char = "/"
+        self.attack_bonus = 1
+        self.defense_bonus = 4
+        self.damage_bonus = 2
+        #self.protection = 1
+        
+class Mace(Item):
+    
+    def overwrite_parameters(self):
+        self.char = "q"
+        self.attack_bonus = -2
+        self.defense_bonus = 1
+    
+        self.damage_bonus = 5
+          
+        #self.protection = 2
+        
+class Shield(Item):
+    
+    def overwrite_parameters(self):
+        self.char="0"
+        self.defense_bonus = -1
+        self.protection = 6
+        
 class Monster():
     
     number = 0
@@ -513,8 +585,15 @@ def game():
     else:
         print("You failed your quest, but you're alive. Still you are a looser.")
     
+
+
+if __name__ == "__main__":
+    for x in range(15):
+        print(Shield(), Spear(), Sword(), Mace())
+
+    input("weiter...")
         
-game()
+    game()
         
                     
                 

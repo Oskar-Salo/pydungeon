@@ -113,7 +113,7 @@ def make_monsters(dungeon):
                             Snake(x,y,z)
                         elif what == "golem":
                             Golem(x,y,z)
-                    elif random.random() < 0.01:
+                    elif random.random() < 0.03:
                         what = random.choice(("mace","shield","spear","sword"))
                         if what == "mace":
                             Mace(x,y,z)
@@ -174,7 +174,7 @@ class Item():
         pass
 
     def __str__(self):
-        msg = "\n--------------------{}--------------------------------".format(self.__class__.__name__)
+        msg = "\n# {}----------{}--------------------------------".format(self.number, self.__class__.__name__)
         msg += "\nmy quality is {}%".format(self.quality * 100)
         msg += "\nmy BONUS is " + str(self.bonus)
         msg += "\ndamage = {} {} {} = {}".format(self.damage_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.damage_bonus+self.bonus)
@@ -382,6 +382,21 @@ class Golem(Monster):
         self.damage_bonus = 1
         self.agility = 0.1
 
+def inventory(player):
+    print("========= player inventory ==============")
+    bag = []
+    
+    for i in Item.store.values():
+        if i.carrier == player.number:
+            bag.append(i)
+    # ---- output ----
+    for nr, i in enumerate(bag, 1):
+        print(nr, "----", i.__class__.__name__, "" if i.bonus == 0 else "bonus:"+str(i.bonus))
+        print("Quality:", i.quality * 100)
+        
+        
+    input("press Enter")
+
 def fight(attacker, defender):
     """strike and counterstrike"""
     print("--- strike ---")
@@ -534,6 +549,8 @@ def game():
         dx, dy = 0, 0
         if command == "quit":
             break
+        if command == "i" or command == "I" or command == "inventory":
+            inventory(player)
         if command == "up" and player.z > 0:
             if dungeon[player.z][player.y][player.x] == "<":
                 player.z -= 1

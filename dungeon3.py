@@ -391,8 +391,13 @@ def inventory(player):
             bag.append(i)
     # ---- output ----
     for nr, i in enumerate(bag, 1):
-        print(nr, "----", i.__class__.__name__, "" if i.bonus == 0 else "bonus:"+str(i.bonus))
-        print("Quality:", i.quality * 100)
+        sign = ""
+        if i.bonus > 0:
+            sign = "+"
+        if i.bonus < 0:
+            sign = "-"
+        print("# {}: ---------- {} {}{}---------".format(nr, i.__class__.__name__, sign, "" if i.bonus == 0 else abs(i.bonus) ))
+        print("     Quality:{:.0f}% att:{} def:{} dmg:{}".format(i.quality* 100, i.attack_bonus+i.bonus, i.defense_bonus+i.bonus, i.damage_bonus+i.bonus))
         
         
     input("press Enter")

@@ -102,7 +102,7 @@ def make_monsters(dungeon):
         for y, line in enumerate(d):
             #row = []
             for x, char in enumerate(line):
-                print("monstermaking", x,y,z, char)
+                #print("monstermaking", x,y,z, char)
                 if char == ".":
                     # create a monster
                     if random.random() < 0.03:
@@ -113,6 +113,16 @@ def make_monsters(dungeon):
                             Snake(x,y,z)
                         elif what == "golem":
                             Golem(x,y,z)
+                    elif random.random() < 0.01:
+                        what = random.choice(("mace","shield","spear","sword"))
+                        if what == "mace":
+                            Mace(x,y,z)
+                        elif what == "shield":
+                            Shield(x,y,z)
+                        elif what== "spear":
+                            Spear(x,y,z)
+                        elif what == "sword":
+                            Sword(x,y,z)
                     else:
                         # -- check if this is a place to create a door ----
                         if (((dungeon[z][y-1][x] == "#" and dungeon[z][y+1][x] == "#") and
@@ -138,26 +148,35 @@ class Item():
     number = 0
     store = {}
    
-    def __init__(self, x=1, y=1, z=1):
-       self.number = Item.number
-       Item.number += 1
-       Item.store[self.number] = self
-       # bonus
-       self.damage_bonus = 0
-       self.attack_bonus = 0
-       self.defense_bonus = 0
-       self.char = "x"
-       self.protection = 0
-       self.quality = random.random()
-       self.bonus = int(random.gauss(0,1))
-       self.overwrite_parameters()
+    def __init__(self, x=1, y=1, z=1, carrier=None):
+        self.number = Item.number
+        Item.number += 1
+        Item.store[self.number] = self
+        # location 
+        self.carrier = carrier
+        self.x = x
+        self.y = y
+        self.z = z
+        # bonus
+        self.damage_bonus = 0
+        self.attack_bonus = 0
+        self.defense_bonus = 0
+        self.char = "x"
+        self.protection = 0
+        self.quality = round(random.gauss(0.75, 0.05), 2)
+        self.quality = min(1, self.quality)
+        self.quality = max(0, self.quality)
+        
+        self.bonus = int(round(random.gauss(0, 0.6), 0))
+        self.overwrite_parameters()
        
     def overwrite_parameters():
         pass
 
     def __str__(self):
         msg = "\n--------------------{}--------------------------------".format(self.__class__.__name__)
-        msg += "\nmein BONUS ist " + str(self.bonus)
+        msg += "\nmy quality is {}%".format(self.quality * 100)
+        msg += "\nmy BONUS is " + str(self.bonus)
         msg += "\ndamage = {} {} {} = {}".format(self.damage_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.damage_bonus+self.bonus)
         msg += "\ndefense = {} {} {} = {}".format(self.defense_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.defense_bonus+self.bonus)
         msg += "\nattack = {} {} {} = {}".format(self.attack_bonus, "-" if self.bonus<0 else "+", abs(self.bonus), self.attack_bonus+self.bonus)
@@ -461,7 +480,7 @@ def game():
             dx, dy = m.ai()
             target = dungeon[m.z][m.y+dy][m.x+dx]
             #-- wall check-----
-            if target == "#" or target == "D":  # TODO: ~ for outer wall
+            if target == "#" or target == "D" or target == "~":  
                 continue
             #---- other monster---
             for m2 in Monster.zoo.values():
@@ -493,7 +512,19 @@ def game():
                         print(m.char, end="")
                         break
                 else:
-                    print(char, end="")
+                    # Item ?
+                    for i in Item.store.values():
+                        if i.carrier is not None:
+                            continue
+                        if i.z == player.z and i.y == y and i.x == x:
+                            print(i.char, end="")
+                            break
+                    else:   # print dungeon tile 
+                        if char == "~":   # display outer wall as wall
+                            c = "#"
+                        else:
+                            c = char
+                        print(c, end="")
             print() # end of line
         # --- status ---
         status = "hp: {} keys: {}  amulets: {}  {}".format(
@@ -524,8 +555,7 @@ def game():
             dx = 1
         # ---- collision test with wall ----
         target = dungeon[player.z][player.y + dy][player.x + dx] 
-        if target == "#":
-            #print("Oouch!")
+        if target == "#" or target == "~":
             message += "Ouch! "
             player.hitpoints -= 1
             dx, dy = 0, 0
@@ -556,26 +586,22 @@ def game():
         player.y += dy
         # ----- found something? -----
         pos = dungeon[player.z][player.y][player.x]
-        if pos == "k":
-            #print("i found a key!")
-            message += "i found a key! "
-            dungeon[player.z][player.y][player.x] = "."
-            player.keys += 1
-        if pos == "A":
-            #print("i found an amulett")
-            message += "i found an amulett "
-            dungeon[player.z][player.y][player.x] = "."
-            player.amulets += 1
-            if player.amulets == 5:
-                player.finished = True
-                #return
+        
+        #  --- stairs -----
         if pos == "<":
             #print("i found a stair up. you can use the UP command")
             message += "i found a stair up. you can use the UP command "
         if pos == ">":
             #print("i found a stair down. you can use the DOWN command")
             message += "i found a stair down. you can use the DOWN command "
-    
+        # ---- pick up item(s) -----
+        for i in Item.store.values():
+            if i.carrier is not None:
+                continue
+            if i.z == player.z and i.y == player.y and i.x == player.x:
+                message += "\nyou pick up an item!"
+                i.carrier = player.number
+        
     # ========= end of game loop ===========
     print("Game Over")        
     if player.hitpoints < 1:
@@ -588,11 +614,6 @@ def game():
 
 
 if __name__ == "__main__":
-    for x in range(15):
-        print(Shield(), Spear(), Sword(), Mace())
-
-    input("weiter...")
-        
     game()
         
                     

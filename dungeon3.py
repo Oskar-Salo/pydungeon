@@ -141,8 +141,87 @@ def opendoor(player, door):
     #print("You must find a key (k) to open the door")
     message += "You must find a key (k) to open the door "
         
+        
+class NaturalWeapon():
 
+    def __init__(self,):
+        #self.number = NaturalWeapon.number
+        #NaturalWeapon.number += 1
+        #NaturalWeapon.store[self.number] = self
+        self.damage_bonus = 0
+        self.attack_bonus = 0
+        self.defense_bonus = 0
+        
+        self.overwrite_parameters()
+        
+    def overwrite_parameters(self):
+        pass
+        
+class Fist(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 0
+        self.attack_bonus = 0
+        self.defense_bonus = 0
 
+class Kick(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 3
+        self.attack_bonus = -2
+        self.defense_bonus = 2
+        
+class SnakeBite(NaturalWeapon):
+    
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 1
+        self.attack_bonus = 2
+        self.defense_bonus = 2
+
+class WolfBite(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 1
+        self.attack_bonus = 2
+        self.defense_bonus = 2
+        
+class GolemArm(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 2
+        self.attack_bonus = 0
+        self.defense_bonus = 0
+        
+class DragonBite(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 9
+        self.attack_bonus = -3
+        self.defense_bonus = -3
+        
+class DragonClaw(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 2
+        self.attack_bonus = -1
+        self.defense_bonus = -1
+
+class DragonTail(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 3
+        self.attack_bonus = 0
+        self.defense_bonus = 0
+
+class FireBreath(NaturalWeapon):
+    def overwrite_parameters(self):
+        
+        self.damage_bonus = 4
+        self.attack_bonus = 3
+        self.defense_bonus = -4
+        
+        
 class Item():
 
     number = 0
@@ -196,9 +275,9 @@ class Spear(Item):
     
     def overwrite_parameters(self):
         self.char = "/"
-        self.attack_bonus = 1
+        self.attack_bonus = 2
         self.defense_bonus = 4
-        self.damage_bonus = 2
+        self.damage_bonus = 1
         #self.protection = 1
         
 class Mace(Item):
@@ -207,8 +286,7 @@ class Mace(Item):
         self.char = "q"
         self.attack_bonus = -2
         self.defense_bonus = 1
-    
-        self.damage_bonus = 5
+        self.damage_bonus = 8
           
         #self.protection = 2
         
@@ -216,8 +294,7 @@ class Shield(Item):
     
     def overwrite_parameters(self):
         self.char="0"
-        self.defense_bonus = -1
-        self.protection = 6
+        self.defense_bonus = 5
         
 class Monster():
     
@@ -233,6 +310,8 @@ class Monster():
         self.z = z
         self.agility = 0.2
         self.char = "M"
+        self.wielding = None
+        self.natural_weapons = []
         self.hitpoints = 100
         self.overwrite_parameters()
         
@@ -307,11 +386,9 @@ class Door(Monster):
     def overwrite_parameters(self):
         self.hitpoints = random.choice((100,100,100,100,110,120,125,140,150,150,175))
         self.attack = (0, 1)
-        self.defense = (1, 6)
-        self.attack_bonus = 0
-        self.defense_bonus = 3
+        self.defense = (1, 9)
         self.damage = (0,1)
-        self.damage_bonus = 0
+        self.natural_weapon = None
         self.char = "d"
     
     def ai(self):
@@ -331,6 +408,8 @@ class Hero(Monster):
         self.damage = (2, 10)
         self.damage_bonus = 3
         self.finished = False
+        self.natural_weapons = [Fist(), Kick()]
+        self.wielding = None
         
         
 class Wolf(Monster):
@@ -339,11 +418,9 @@ class Wolf(Monster):
         self.hitpoints = 30
         self.char = "W"
         self.attack = (2, 6) # 2 dice, each die has six sides
-        self.attack_bonus = 2
         self.defense = (2, 6)
-        self.defense_bonus = 2
         self.damage = (2, 4)
-        self.damage_bonus = 1
+        self.natural_weapons = [WolfBite()]
         self.agility = 0.4
         
 class Snake(Monster):
@@ -351,11 +428,9 @@ class Snake(Monster):
         self.hitpoints = 20
         self.char = "S"
         self.attack = (2, 4) # 2 dice, each die has four sides
-        self.attack_bonus = 2
         self.defense = (3, 3)
-        self.defense_bonus = 2
         self.damage = (3, 4)
-        self.damage_bonus = 1
+        self.natural_weapons = [SnakeBite()]
         self.agility = 0.25
         
 class Dragon(Monster):
@@ -367,7 +442,7 @@ class Dragon(Monster):
         self.defense = (3, 5)
         self.defense_bonus = 2
         self.damage = (3, 3)
-        self.damage_bonus = 2
+        self.natural_weapon = [DragonBite(), DragonClaw(), DragonTail(), FireBreath()]
         self.agility = 0.3
         
 class Golem(Monster):
@@ -375,11 +450,9 @@ class Golem(Monster):
         self.hitpoints = 50
         self.char = "G"
         self.attack = (2, 4)
-        self.attack_bonus = 1
         self.defense = (2, 4)
-        self.defense_bonus = 2
         self.damage = (2, 4)
-        self.damage_bonus = 1
+        self.natural_weapons = [GolemArm()]
         self.agility = 0.1
 
 def inventory(player):
@@ -390,17 +463,39 @@ def inventory(player):
         if i.carrier == player.number:
             bag.append(i)
     # ---- output ----
+    print("----------------natural weapons ------------------")
+    u = "(using)" if player.wielding is None else ""
+    for nr, i in enumerate(player.natural_weapons):
+        print("# {}: {}---------- {}---------".format(0, u, i.__class__.__name__))
+        print("     Quality:{:.0f}% att:{} def:{} dmg:{}".format(100, i.attack_bonus, i.defense_bonus, i.damage_bonus))
+    print("---------------------selectable weapons--------------------")
     for nr, i in enumerate(bag, 1):
+        u = "(using)" if player.wielding == i else ""
         sign = ""
         if i.bonus > 0:
             sign = "+"
         if i.bonus < 0:
             sign = "-"
-        print("# {}: ---------- {} {}{}---------".format(nr, i.__class__.__name__, sign, "" if i.bonus == 0 else abs(i.bonus) ))
+        print("# {}: {}---------- {} {}{}---------".format(nr, u, i.__class__.__name__, sign, "" if i.bonus == 0 else abs(i.bonus) ))
         print("     Quality:{:.0f}% att:{} def:{} dmg:{}".format(i.quality* 100, i.attack_bonus+i.bonus, i.defense_bonus+i.bonus, i.damage_bonus+i.bonus))
         
-        
-    input("press Enter")
+    command = input("press ENTER or number of weapon to eqip and ENTER: ")
+    if command == "0":
+        player.wielding = None
+        input("You use your natural weapons. press ENTER: ")
+        return
+    try:
+        cnr = int(command)
+    except:
+        return
+    try:
+        weapon = bag[cnr-1]
+    except:
+        print("i cannot find this number")
+        return
+    
+    player.wielding = weapon
+    input("You are now wielding {} press ENTER: ".format(weapon.__class__.__name__))
 
 def fight(attacker, defender):
     """strike and counterstrike"""
@@ -417,11 +512,34 @@ def strike(a, d):
     """a = attacker, d = defender"""
     namea= a.__class__.__name__
     named= d.__class__.__name__
+    if a.natural_weapons == [] and a.wielding is None:
+        print(" {} has no weapon to attack".format(namea))
+        return
+    # wa = weapon of attacker, wd = weapon of defender
+    if a.wielding is None:
+        wa = random.choice(a.natural_weapons)
+        namewa = wa.__class__.__name__
+    else:
+        wa = a.wielding
+        namewa = wa.__class__.__name__
+        
+    if d.natural_weapons == [] and d.wielding is None:
+        namewd = "nothing"
+        wd = None
+    elif d.wielding is None:
+        wd = random.choice(d.natural_weapons)
+        namewd = wd.__class__.__name__
+    else:
+        wd = d.wielding
+        namewd = wd.__class__.__name__
+        
     print("{} strikes at {}".format(namea, named))
-    print("attack value:")
-    attack_a = roll(a.attack, a.attack_bonus)
-    print("defense value:")
-    defend_d = roll(d.defense, d.defense_bonus)
+    print("{} attacks with {}".format(namea, namewa))
+    print("{} defends with {}".format(named, namewd))
+    #print("attack value:")
+    attack_a = roll(a.attack, wa.attack_bonus)
+    #print("defense value:")
+    defend_d = roll(d.defense, wd.defense_bonus if wd is not None else 0)
     # --- hit? ---
     if attack_a <= defend_d:
         print("{} <= {}: miss.....".format(attack_a, defend_d))
@@ -431,7 +549,7 @@ def strike(a, d):
     input("press enter to continue....")
     # ---- damage ----
     print("calculating damage...")
-    damage = roll(a.damage, a.damage_bonus)
+    damage = roll(a.damage, wa.damage_bonus)
     d.hitpoints -= damage
     print("{} looses {} hp and has only {} hp left".format(
           named, damage, d.hitpoints))
@@ -620,9 +738,14 @@ def game():
         for i in Item.store.values():
             if i.carrier is not None:
                 continue
-            if i.z == player.z and i.y == player.y and i.x == player.x:
-                message += "\nyou pick up an item!"
-                i.carrier = player.number
+            if i.z == player.z and i.y == player.y and i.x == player.x and i.carrier is None:
+                message += "\nyou found an item you can pick it up(e)!"
+                message += "\n{}".format(i)
+                print (message)
+                answer = input("If you want to pick this item up click e: ")
+                if answer == "e" or answer == "yes":
+                    i.carrier = player.number
+                message = ""
         
     # ========= end of game loop ===========
     print("Game Over")        
@@ -646,4 +769,4 @@ if __name__ == "__main__":
     
         
     
-    
+   
